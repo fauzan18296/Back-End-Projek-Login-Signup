@@ -19,23 +19,26 @@ app.get('/signup', (req, res) => {
 res.render('signup');
 })
 
-app.post('/signup',async (req,res) => {
+app.post('/signup', (req,res) => {
   const data = {
-    name:await req.body.username,
-    password:await req.body.password
+    name: req.body.username,
+    password: req.body.password
   }
+
 // Membuat query SELECT * FROM users WHERE username AND password agar tidak ada duplicate username dan password
-db.query(`SELECT * FROM users WHERE username = '${data.name}' AND password = '${data.password}' `,(err,results) => {
-  if(err)throw Error;
-  if(results.length > 0) res.status(409).json({Message: "Nama pengguna sudah ada!"})
+db.query(`SELECT * FROM users WHERE username = '${data.name}' AND password = '${data.password}' `,(result) => {
+  try{
+  if(result && result.length > 0)res.status(409).json({message:'Nama pengguna sudah ada!'})
 
     // Membuat query INSERT untuk menambahkan username dan password jika tidak ada isi yang sama atau duplicate
-db.query(`INSERT INTO users(username, password) VALUES('${data.name}', '${data.password}')`,(error) => {
-  if(error)throw Error;
+db.query(`INSERT INTO users(username, password) VALUES('${data.name}', '${data.password}')`,() => {
   res.redirect("/")
-  })//end query INSERT
-})//end query SELECT * FROM users WHERE username AND password 
-  })//end line http method post
+  })
+}catch(err) {
+  console.error(err)
+  }
+    })
+  })
 
 const port = 3000;
 app.listen(port, () => {
